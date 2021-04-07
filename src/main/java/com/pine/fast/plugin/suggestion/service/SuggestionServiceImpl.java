@@ -16,23 +16,20 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.pine.fast.plugin.misc.GenericUtil;
-import com.pine.fast.plugin.persistent.ServerPersistent;
-import com.pine.fast.plugin.persistent.ServiceConfig;
+import com.pine.fast.plugin.suggestion.Suggestion;
+import com.pine.fast.plugin.suggestion.SuggestionNode;
+import com.pine.fast.plugin.suggestion.completion.FileType;
 import com.pine.fast.plugin.suggestion.metadata.MetadataNonPropertySuggestionNode;
 import com.pine.fast.plugin.suggestion.metadata.MetadataPropertySuggestionNode;
 import com.pine.fast.plugin.suggestion.metadata.MetadataSuggestionNode;
 import com.pine.fast.plugin.suggestion.metadata.json.GsonPostProcessEnablingTypeFactory;
-import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderTypeDeserializer;
-import com.pine.fast.plugin.suggestion.Suggestion;
-import com.pine.fast.plugin.suggestion.SuggestionNode;
-import com.pine.fast.plugin.suggestion.completion.FileType;
 import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadata;
 import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadataHint;
 import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
 import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderType;
+import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderTypeDeserializer;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,9 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.concurrent.Future;
 import javax.annotation.Nullable;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
@@ -89,11 +84,6 @@ public class SuggestionServiceImpl implements SuggestionService {
         return splits;
     }
 
-    private static String firstPathSegment(String element) {
-        return element.trim().split(Suggestion.PERIOD_DELIMITER, -1)[0];
-    }
-
-
     private void initSearchIndex(Module module) {
         Trie<String, MetadataSuggestionNode> rootSearchIndex = moduleNameToRootSearchIndex.get(MODULE_NAME);
         Trie<String, MetadataSuggestionNode> simpleSearchIndex = moduleNameToRootSearchIndex.get(SIMPLE_NAME);
@@ -103,7 +93,6 @@ public class SuggestionServiceImpl implements SuggestionService {
             simpleSearchIndex = new PatriciaTrie<>();
             moduleNameToRootSearchIndex.put(MODULE_NAME, rootSearchIndex);
             moduleNameToRootSearchIndex.put(SIMPLE_NAME, simpleSearchIndex);
-
 
             try {
                 // TODO: pine 2021/3/31 通过本地配置 + 外部配置实现
@@ -128,32 +117,13 @@ public class SuggestionServiceImpl implements SuggestionService {
         }
     }
 
-    @Nullable
-    @Override
-    public List<SuggestionNode> findMatchedNodesRootTillEnd(Project project, Module module,
-                                                            List<String> containerElements) {
-        if (moduleNameToRootSearchIndex.containsKey(module.getName())) {
-            String[] pathSegments =
-                    containerElements.stream().flatMap(element -> stream(toSanitizedPathSegments(element)))
-                            .toArray(String[]::new);
-            MetadataSuggestionNode searchStartNode =
-                    moduleNameToRootSearchIndex.get(module.getName()).get(pathSegments[0]);
-            if (searchStartNode != null) {
-                List<SuggestionNode> matches = GenericUtil.modifiableList(searchStartNode);
-                if (pathSegments.length > 1) {
-                    return searchStartNode.findDeepestSuggestionNode(module, matches, pathSegments, 1);
-                }
-                return matches;
-            }
-        }
-        return null;
-    }
-
     @Override
     public boolean canProvideSuggestions(Project project, Module module) {
-        ServerPersistent serverPersistent = ServerPersistent.getInstance();
-        ServiceConfig state = serverPersistent.getState();
-        return state == null || state.getHint() == null || state.getHint();
+        // TODO: pine 2021/4/7  持久化数据待完善
+//        ServerPersistent serverPersistent = ServerPersistent.getInstance();
+//        ServiceConfig state = serverPersistent.getState();
+//        return state == null || state.getHint() == null || state.getHint();
+        return true;
     }
 
     @Override
@@ -432,8 +402,8 @@ public class SuggestionServiceImpl implements SuggestionService {
 
 
     private void addSimplesToIndex(
-                                   Trie<String, MetadataSuggestionNode> rootSearchIndex,
-                                   SpringConfigurationMetadata springConfigurationMetadata, String containerArchiveOrFileRef) {
+            Trie<String, MetadataSuggestionNode> rootSearchIndex,
+            SpringConfigurationMetadata springConfigurationMetadata, String containerArchiveOrFileRef) {
         List<SpringConfigurationMetadataProperty> simples =
                 springConfigurationMetadata.getSimples();
         simples.sort(comparing(SpringConfigurationMetadataProperty::getName));

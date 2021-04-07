@@ -4,16 +4,13 @@ import com.intellij.openapi.module.Module;
 import com.pine.fast.plugin.misc.GenericUtil;
 import com.pine.fast.plugin.suggestion.Suggestion;
 import com.pine.fast.plugin.suggestion.SuggestionNode;
-import com.pine.fast.plugin.suggestion.SuggestionNodeType;
 import com.pine.fast.plugin.suggestion.completion.FileType;
 import com.pine.fast.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
 import gnu.trove.THashSet;
-
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import javax.annotation.Nullable;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -97,18 +94,6 @@ public class MetadataPropertySuggestionNode extends MetadataSuggestionNode {
         return false;
     }
 
-    /**
-     * Type information can come from `hint` & `type` attribute of `SpringConfigurationMetadataProperty`
-     *
-     * @param module module
-     * @return node type
-     */
-    @NotNull
-    @Override
-    public SuggestionNodeType getSuggestionNodeType(Module module) {
-        return property.getSuggestionNodeType(module);
-    }
-
     @NotNull
     @Override
     public String getOriginalName() {
@@ -159,7 +144,7 @@ public class MetadataPropertySuggestionNode extends MetadataSuggestionNode {
                                                                   List<SuggestionNode> matchesRootTillMe, int numOfAncestors, String[] querySegmentPrefixes,
                                                                   int querySegmentPrefixStartIndex, @Nullable Set<String> siblingsToExclude) {
         if (!property.isDeprecatedError()) {
-            // querySegmentPrefixStartIndex 0±íÊ¾Ã»ÓÐÕÒµ½£¬²éÕÒ¶ù×Ó½ÚµãÊÇ·ñÆ¥Åä£¬±ê¼ÇÎª1ÒÑ¾­ÕÒµ½ÁËÍ·£¬Ö±½Ó×é×°½¨ÒéÏÔÊ¾¶ÔÏó
+            // querySegmentPrefixStartIndex æ ‡è®°ä¸º0æ—¶åˆ™è¡¨ç¤ºæ²¡æœ‰æ‰¾åˆ°çˆ¶èŠ‚ç‚¹ï¼Œéœ€è¦ç»§ç»­ä»Žå­èŠ‚ç‚¹ä¸­å¯»æ‰¾ï¼Œæ ‡è®°ä¸º1æ—¶ç›´æŽ¥ç»„è£…æˆ suggestion å¯¹è±¡
             boolean lookingForConcreteNode = querySegmentPrefixStartIndex >= querySegmentPrefixes.length;
             if (lookingForConcreteNode) {
                 return GenericUtil.newSingleElementSortedSet(property.buildKeySuggestion(module, fileType, matchesRootTillMe, numOfAncestors));
@@ -186,11 +171,6 @@ public class MetadataPropertySuggestionNode extends MetadataSuggestionNode {
         return null;
     }
 
-    @Nullable
-    @Override
-    public String getDocumentationForKey(Module module, String nodeNavigationPathDotDelimited) {
-        return property.getDocumentationForKey(nodeNavigationPathDotDelimited);
-    }
 
     @Nullable
     @Override
@@ -201,12 +181,6 @@ public class MetadataPropertySuggestionNode extends MetadataSuggestionNode {
                 .findSuggestionsForValues(module, fileType, matchesRootTillMe, prefix, siblingsToExclude);
     }
 
-    @Nullable
-    @Override
-    public String getDocumentationForValue(Module module, String nodeNavigationPathDotDelimited,
-                                           String originalValue) {
-        return property.getDocumentationForValue(module, nodeNavigationPathDotDelimited, originalValue);
-    }
 
     @Override
     protected boolean isRoot() {
@@ -240,11 +214,6 @@ public class MetadataPropertySuggestionNode extends MetadataSuggestionNode {
         belongsTo.remove(containerPath);
         // If the current node & all its children belong to a single file, lets remove the whole tree
         return belongsTo.size() == 0;
-    }
-
-    @Override
-    public void refreshClassProxy(Module module) {
-        property.refreshDelegate(module);
     }
 
 }

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
@@ -51,7 +50,7 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
             return;
         }
 
-        // ÔÚµ±Ç°yamlÖĞÒÑ¾­´æÔÚµÄkeyÖµ£¬½øĞĞÈ¥ÖØ´¦Àí
+        // å·²ç»å­˜åœ¨çš„keyï¼Œéœ€è¦è¿›è¡Œæ’é™¤
         Set<String> siblingsToExclude = null;
 
         PsiElement elementContext = element.getContext();
@@ -113,7 +112,7 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
         }
 
         suggestions = service
-                .findSuggestionsForQueryPrefix(project, module, FileType.yaml, element, ancestralKeys,
+                .findSuggestionsForQueryPrefix(project, module, FileType.YAML, element, ancestralKeys,
                         queryWithDotDelimitedPrefixes, handleStr, siblingsToExclude);
 
         if (suggestions != null) {
