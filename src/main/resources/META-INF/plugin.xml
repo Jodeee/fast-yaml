@@ -10,8 +10,6 @@
     <description>YAML code completion plugin</description>
     <change-notes/>
 
-    <idea-version since-build="172"/>
-
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
@@ -31,7 +29,8 @@
                 implementation="com.pine.fast.plugin.suggestion.completion.YamlDocumentationProvider"/>
 
 
-        <applicationService serviceImplementation="com.pine.fast.plugin.persistent.ServerPersistent"/>
+        <!--  持久化服务   -->
+        <!--  <applicationService serviceImplementation="com.pine.fast.plugin.persistent.ServerPersistent"/> -->
 
         <projectService
                 serviceInterface="com.pine.fast.plugin.suggestion.service.SuggestionService"
